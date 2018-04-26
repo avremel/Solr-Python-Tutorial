@@ -1,8 +1,6 @@
-from urllib.request import urlopen
-import urllib.parse
 import simplejson
 from .ProcessSolrResponse import ProcessSolrResponse
-import pdb
+from .QuerySolr import QuerySolr
 
 class GalleryItems:
 
@@ -44,12 +42,11 @@ class GalleryItems:
         ]
         self.filters = []
         self.solr_args = []
-        self.complete_url = ''
-        self.raw_response = []
+        query_solr = QuerySolr(self.solr_args, self.solr_url).response
+        self.raw_response = query_solr['raw_response']
+        self.complete_url = query_solr['complete_url']
 
         self.setup_query()
-        self.create_url()
-        self.query_solr()
         self.process_response()
 
 
@@ -68,15 +65,6 @@ class GalleryItems:
         self.apply_facet_pivots()
         self.apply_price_ranges()
         self.apply_generic_args()
-
-    def query_solr(self):
-        connection = urlopen(self.complete_url)
-        self.raw_response = simplejson.load(connection)
-
-    def create_url(self):
-        encoded_query = urllib.parse.urlencode(self.solr_args)
-        complete_url = self.solr_url + encoded_query
-        self.complete_url = complete_url
     
     def process_response(self):
         # seperated response processing into new class
